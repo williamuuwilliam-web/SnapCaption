@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SnapCaption – Free Caption Generator for Instagram, TikTok, YouTube & Twitter</title>
+<meta name="description" content="Generate free captions for Instagram, TikTok, YouTube, and Twitter in seconds. No signup needed. SnapCaption is your free AI-powered caption maker."/>
+<meta name="keywords" content="free caption generator, Instagram captions free, TikTok captions, YouTube caption maker, Twitter captions, social media captions, AI caption generator"/>
+<meta name="author" content="SnapCaption"/>
+<meta property="og:title" content="SnapCaption – Free Caption Generator"/>
+<meta property="og:description" content="Create perfect captions for any social media platform in seconds. Free forever."/>
+<meta property="og:type" content="website"/>
+<link rel="canonical" href="https://snapcaption.vercel.app/"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;
+  --card:#13131a;
+  --border:#222230;
+  --accent:#7c6dfa;
+  --accent2:#fa6d8a;
+  --text:#f0effe;
+  --muted:#7a7a9a;
+  --radius:14px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* noise texture overlay */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:0}
+
+/* glow blobs */
+.blob{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:.18}
+.blob1{width:500px;height:500px;background:var(--accent);top:-100px;left:-100px}
+.blob2{width:400px;height:400px;background:var(--accent2);bottom:-80px;right:-80px}
+
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--border);backdrop-filter:blur(20px);background:rgba(10,10,15,.8)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.02em;color:var(--text)}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:1.5rem;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+hero{display:block;position:relative;z-index:1;text-align:center;padding:5rem 1.5rem 3rem}
+hero h1{font-family:'Syne',sans-serif;font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;line-height:1.1;letter-spacing:-.04em;margin-bottom:1.2rem}
+hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+hero p{color:var(--muted);font-size:1.15rem;max-width:540px;margin:0 auto 2.5rem;font-weight:300}
+.badge-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.badge{background:var(--card);border:1px solid var(--border);border-radius:100px;padding:.3rem .9rem;font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:.4rem}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* MAIN TOOL */
+.tool-wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 1.5rem 4rem}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem;overflow:hidden}
+
+/* platform tabs */
+.platform-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{background:transparent;border:1px solid var(--border);border-radius:100px;padding:.4rem 1rem;font-size:.85rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.tab:hover:not(.active){border-color:var(--accent);color:var(--text)}
+
+/* platform icon labels */
+.tab[data-p="instagram"]::before{content:'📸 '}
+.tab[data-p="tiktok"]::before{content:'🎵 '}
+.tab[data-p="youtube"]::before{content:'▶️ '}
+.tab[data-p="twitter"]::before{content:'🐦 '}
+
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.5rem;font-weight:500;letter-spacing:.02em;text-transform:uppercase}
+
+.field{margin-bottom:1.2rem}
+textarea,input,select{width:100%;background:#0f0f18;border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;transition:border-color .2s;resize:none}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
+textarea{height:110px;line-height:1.5}
+select option{background:#13131a}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:560px){.row2{grid-template-columns:1fr}}
+
+/* tone pills */
+.tone-group{display:flex;flex-wrap:wrap;gap:.5rem}
+.tone-pill{background:transparent;border:1px solid var(--border);border-radius:100px;padding:.3rem .85rem;font-size:.82rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.tone-pill.selected{background:rgba(124,109,250,.15);border-color:var(--accent);color:var(--accent)}
+.tone-pill:hover:not(.selected){border-color:var(--muted);color:var(--text)}
+
+.generate-btn{width:100%;margin-top:1.5rem;padding:1rem;background:var(--accent);border:none;border-radius:var(--radius);color:#fff;font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;letter-spacing:.01em;transition:all .2s;position:relative;overflow:hidden}
+.generate-btn:hover{background:#6b5ef0;transform:translateY(-1px)}
+.generate-btn:active{transform:translateY(0)}
+.generate-btn.loading{pointer-events:none;opacity:.7}
+
+/* results */
+.results{margin-top:1.8rem;display:none}
+.results.show{display:block}
+.results-label{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem;font-weight:500}
+.caption-card{background:#0f0f18;border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.2rem;margin-bottom:.8rem;position:relative;transition:border-color .2s}
+.caption-card:hover{border-color:var(--accent)}
+.caption-text{font-size:.95rem;line-height:1.65;color:var(--text);white-space:pre-wrap;padding-right:2.5rem}
+.copy-btn{position:absolute;top:.9rem;right:.9rem;background:var(--border);border:none;border-radius:8px;padding:.35rem .6rem;color:var(--muted);cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif;transition:all .2s}
+.copy-btn:hover{background:var(--accent);color:#fff}
+.copy-btn.copied{background:#1d9e75;color:#fff}
+
+/* AD SLOT */
+.ad-slot{background:var(--card);border:1px dashed var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;color:var(--muted);font-size:.8rem;margin:2.5rem 0;min-height:100px;display:flex;align-items:center;justify-content:center}
+
+/* HOW IT WORKS */
+.section{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:3rem 1.5rem}
+.section-title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700;margin-bottom:.5rem;letter-spacing:-.02em}
+.section-sub{color:var(--muted);margin-bottom:2.5rem;font-size:.95rem}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.step-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem}
+.step-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--accent);opacity:.5;margin-bottom:.5rem}
+.step-card h3{font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;margin-bottom:.4rem}
+.step-card p{font-size:.85rem;color:var(--muted);line-height:1.5}
+
+/* FAQ */
+.faq-item{border-bottom:1px solid var(--border);padding:1.2rem 0}
+.faq-q{font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.faq-q::after{content:'+';font-size:1.3rem;color:var(--accent);flex-shrink:0;transition:transform .2s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{font-size:.9rem;color:var(--muted);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
+.faq-item.open .faq-a{max-height:200px;padding-top:.8rem}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;color:var(--muted);font-size:.85rem}
+footer strong{color:var(--text);font-family:'Syne',sans-serif}
+
+/* animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.tool-card,.step-card{animation:fadeUp .5s ease both}
+.step-card:nth-child(2){animation-delay:.1s}
+.step-card:nth-child(3){animation-delay:.2s}
+.step-card:nth-child(4){animation-delay:.3s}
+
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+
+<nav>
+  <div class="logo">Snap<span>Caption</span></div>
+  <ul class="nav-links">
+    <li><a href="#tool">Generator</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+</nav>
+
+<hero>
+  <h1>Create <em>perfect captions</em><br/>in seconds — free</h1>
+  <p>Generate scroll-stopping captions for Instagram, TikTok, YouTube, and Twitter. No account needed, always free.</p>
+  <div class="badge-row">
+    <span class="badge">Instagram</span>
+    <span class="badge">TikTok</span>
+    <span class="badge">YouTube</span>
+    <span class="badge">Twitter</span>
+    <span class="badge">100% Free</span>
+    <span class="badge">No signup</span>
+  </div>
+</hero>
+
+<!-- AD SLOT TOP -->
+<div class="tool-wrap">
+  <div class="ad-slot" id="ad-top">
+    <!-- Google AdSense ad unit will go here -->
+    Advertisement
+  </div>
+</div>
+
+<div class="tool-wrap" id="tool">
+  <div class="tool-card">
+
+    <!-- Platform tabs -->
+    <div class="platform-tabs">
+      <button class="tab active" data-p="instagram">Instagram</button>
+      <button class="tab" data-p="tiktok">TikTok</button>
+      <button class="tab" data-p="youtube">YouTube</button>
+      <button class="tab" data-p="twitter">Twitter</button>
+    </div>
+
+    <!-- Topic -->
+    <div class="field">
+      <label for="topic">What is your post about?</label>
+      <textarea id="topic" placeholder="e.g. sunset beach photo, new product launch, workout motivation, travel vlog in Paris..."></textarea>
+    </div>
+
+    <div class="row2">
+      <!-- Tone -->
+      <div class="field">
+        <label>Tone</label>
+        <div class="tone-group" id="toneGroup">
+          <button class="tone-pill selected" data-tone="funny">Funny</button>
+          <button class="tone-pill" data-tone="inspiring">Inspiring</button>
+          <button class="tone-pill" data-tone="professional">Professional</button>
+          <button class="tone-pill" data-tone="casual">Casual</button>
+          <button class="tone-pill" data-tone="romantic">Romantic</button>
+          <button class="tone-pill" data-tone="bold">Bold</button>
+        </div>
+      </div>
+
+      <!-- Hashtags -->
+      <div class="field">
+        <label for="hashtags">Include hashtags?</label>
+        <select id="hashtags">
+          <option value="yes">Yes — include hashtags</option>
+          <option value="no">No hashtags</option>
+          <option value="few">Just a few (3–5)</option>
+        </select>
+
+        <label for="emoji" style="margin-top:1rem">Add emojis?</label>
+        <select id="emoji">
+          <option value="yes">Yes — add emojis</option>
+          <option value="no">No emojis</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="generate-btn" id="genBtn" onclick="generateCaptions()">
+      Generate Captions
+    </button>
+
+    <!-- Results -->
+    <div class="results" id="results">
+      <div class="results-label">Your captions — tap to copy</div>
+      <div id="captionList"></div>
+    </div>
+
+  </div>
+
+  <!-- AD SLOT MIDDLE -->
+  <div class="ad-slot" style="margin-top:2rem">
+    <!-- Google AdSense ad unit will go here -->
+    Advertisement
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section" id="how">
+  <div class="section-title">How it works</div>
+  <div class="section-sub">Three steps to your perfect caption</div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <h3>Pick your platform</h3>
+      <p>Choose Instagram, TikTok, YouTube, or Twitter — each has its own style and length.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <h3>Describe your post</h3>
+      <p>Tell us what your post is about and pick a tone that matches your style.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <h3>Copy and post</h3>
+      <p>Get 3 ready-to-use captions instantly. Tap to copy, paste, and go.</p>
+    </div>
+  </div>
+</div>
+
+<!-- WHY SNAPCAPTION -->
+<div class="section" style="padding-top:0">
+  <div class="section-title">Why use SnapCaption?</div>
+  <div class="section-sub">Built for creators, marketers, and anyone who posts online</div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num" style="font-size:1.5rem">✦</div>
+      <h3>Always free</h3>
+      <p>No subscription, no hidden fees. Generate unlimited captions at zero cost.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="font-size:1.5rem">✦</div>
+      <h3>No signup needed</h3>
+      <p>Open the site and start generating. No email, no account, no waiting.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="font-size:1.5rem">✦</div>
+      <h3>Platform-specific</h3>
+      <p>Captions are tailored to each platform's culture, length, and style.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="font-size:1.5rem">✦</div>
+      <h3>Works for everyone</h3>
+      <p>From personal accounts to businesses — SnapCaption works for any niche.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ — SEO gold -->
+<div class="section" id="faq">
+  <div class="section-title">Frequently asked questions</div>
+  <div class="section-sub">Everything you need to know about SnapCaption</div>
+
+  <div class="faq-item">
+    <div class="faq-q">Is SnapCaption really free?</div>
+    <div class="faq-a">Yes — completely free. No credit card, no trial period, no limits. You can generate as many captions as you want at no cost.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Do I need to create an account?</div>
+    <div class="faq-a">No account needed. Just open the site, describe your post, and get your captions instantly.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Which platforms does SnapCaption support?</div>
+    <div class="faq-a">SnapCaption generates captions optimized for Instagram, TikTok, YouTube, and Twitter. Each platform gets captions suited to its style, tone, and character limits.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Can I use SnapCaption for my business?</div>
+    <div class="faq-a">Absolutely. SnapCaption works great for small businesses, brands, and marketers who want to save time on social media content.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How many captions do I get per generation?</div>
+    <div class="faq-a">You get 3 different caption options every time — so you can pick the one that fits best or mix and match ideas.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Can I get captions with hashtags?</div>
+    <div class="faq-a">Yes! You can choose to include hashtags, skip them, or get just a few. SnapCaption will match hashtags to your topic automatically.</div>
+  </div>
+</div>
+
+<!-- AD SLOT BOTTOM -->
+<div class="tool-wrap">
+  <div class="ad-slot">
+    <!-- Google AdSense ad unit will go here -->
+    Advertisement
+  </div>
+</div>
+
+<footer>
+  <strong>SnapCaption</strong> — Free caption generator for social media<br/>
+  <span style="font-size:.78rem;margin-top:.4rem;display:block">© 2025 SnapCaption · Free forever · No signup required</span>
+</footer>
+
+<script>
+let activePlatform = 'instagram';
+let activeTone = 'funny';
+
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    activePlatform = btn.dataset.p;
+  });
+});
+
+document.querySelectorAll('.tone-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.tone-pill').forEach(p => p.classList.remove('selected'));
+    pill.classList.add('selected');
+    activeTone = pill.dataset.tone;
+  });
+});
+
+const captions = {
+  instagram: {
+    funny: [
+      "POV: you came for the {topic} but stayed for the vibes 😭✨ #relatable #fyp",
+      "Me explaining {topic} to absolutely no one but feeling very passionate about it 😂 #mood",
+      "Not me posting about {topic} at this hour... but here we are 🫠 #sendhelp #noregrets"
+    ],
+    inspiring: [
+      "Every moment with {topic} is a reminder of why you started. Keep going. ✨",
+      "{topic} taught me that the journey matters more than the destination. What's yours? 🌟",
+      "Small steps, big changes. {topic} is proof that consistency pays off. 💫 #motivation"
+    ],
+    professional: [
+      "Sharing my latest work on {topic}. Focused on quality, driven by purpose. #content #growth",
+      "Behind every great result is a consistent process. Here's a look at {topic}. 📌",
+      "{topic} — delivering results that speak for themselves. Open to collaborate. 💼 #business"
+    ],
+    casual: [
+      "Just vibing with {topic} today, nothing serious 😌 #weekend #chill",
+      "Honestly? {topic} is everything right now. Can't stop, won't stop. ☀️",
+      "Low-key obsessed with {topic} lately. Anyone else? 👀 #samehere"
+    ],
+    romantic: [
+      "Some things just feel like {topic} — warm, beautiful, and worth every second. 🌹",
+      "If happiness had a name it would be {topic}. 💕 #blessed #love",
+      "The little moments around {topic} are the ones I'll remember forever. 🤍"
+    ],
+    bold: [
+      "{topic}. No explanation needed. 🖤 #iconic #noapologies",
+      "We don't do average here. {topic} only. 🔥 #standards #levelup",
+      "They said it couldn't be done. {topic} proved them wrong. 💥 #bold"
+    ]
+  },
+  tiktok: {
+    funny: [
+      "POV: {topic} has completely taken over my life and I have zero complaints 😭🎵",
+      "Tell me you're obsessed with {topic} without telling me… I'll go first 👀",
+      "The way {topic} lives rent-free in my head 24/7 💀 #fyp #relatable"
+    ],
+    inspiring: [
+      "If {topic} can change my life, imagine what it can do for yours 🙌 #motivation #fyp",
+      "Started with {topic}. Never looked back. Your sign to start today ✨ #growthmindset",
+      "This is your reminder that {topic} is possible for YOU too 💪 #fyp #inspiration"
+    ],
+    professional: [
+      "Here's how {topic} helped me level up — and how it can help you too 📈 #tiktokbusiness",
+      "Breaking down {topic} so you don't have to figure it out alone 💡 #learnontiktok",
+      "The {topic} strategy nobody talks about — until now 🎯 #tips #fyp"
+    ],
+    casual: [
+      "Day in my life feat. {topic} because why not 😌 #vlog #dayinmylife",
+      "Just me and {topic}, no big deal 🤷 #chill #fyp",
+      "Caught me in my {topic} era and honestly I'm thriving 😎 #vibes"
+    ],
+    romantic: [
+      "He/she asked what love looks like. I showed them {topic} 🥹💕 #romance #fyp",
+      "The way {topic} makes everything feel soft and perfect 🌸 #lovetok",
+      "Some things you just feel in your chest. {topic} is one of them 💗"
+    ],
+    bold: [
+      "{topic}. Period. 🔥 #fyp #iconic #notdebating",
+      "Unbothered. Moisturized. Doing {topic}. 💅 #bold #fyp",
+      "Not here to fit in — {topic} all day every day 🖤 #unapologetic"
+    ]
+  },
+  youtube: {
+    funny: [
+      "I tried {topic} so you don't have to... (you're welcome) 😂 Subscribe for more questionable decisions!",
+      "Nobody asked but I made a whole video about {topic} anyway — hope you enjoy the chaos 😭",
+      "My honest, unfiltered, slightly chaotic take on {topic}. Watch till the end 🎬"
+    ],
+    inspiring: [
+      "How {topic} completely changed my perspective — a story I needed to share with you all ✨",
+      "This video about {topic} might just be the push you needed today. Let me know in the comments 💛",
+      "Everything I wish I knew about {topic} before I started. Sharing it all here 🌟"
+    ],
+    professional: [
+      "Full breakdown of {topic}: what works, what doesn't, and exactly what you should do instead 📊",
+      "The complete guide to {topic} — from beginner to confident in one video 🎯",
+      "I tested {topic} for 30 days. Here are my honest results and what I learned 📋"
+    ],
+    casual: [
+      "Just a chill video about {topic} — grab a snack and let's hang 🍿",
+      "Talking about {topic} today because it's been on my mind and this is my channel lol 😌",
+      "Vlog time! Today's all about {topic} — come along 📹"
+    ],
+    romantic: [
+      "A love letter to {topic} — this one comes from the heart 🤍",
+      "Some things deserve to be celebrated. {topic} is one of them. Thank you for watching 💕",
+      "This video about {topic} is for everyone who needed a reminder of what matters most 🌹"
+    ],
+    bold: [
+      "Unpopular opinion: {topic} is the most underrated thing right now. Fight me in the comments 🔥",
+      "I said what I said about {topic}. No apologies. Watch the full video 💥",
+      "The truth about {topic} that nobody wants to hear — but I'm saying it anyway 🎙️"
+    ]
+  },
+  twitter: {
+    funny: [
+      "me: i should sleep\nalso me: *deep diving into {topic} at 2am* 💀",
+      "just spent 3 hours thinking about {topic} and i have no regrets whatsoever",
+      "the way {topic} just lives in my head constantly is actually impressive at this point lmao"
+    ],
+    inspiring: [
+      "a year ago i knew nothing about {topic}. today it changed everything. start before you're ready.",
+      "{topic} reminder: you're closer than you think. keep going.",
+      "the best decision i made was leaning into {topic}. your version of this is waiting for you."
+    ],
+    professional: [
+      "thread on {topic}: what I learned, what surprised me, and what I'd do differently 🧵👇",
+      "sharing my process on {topic} because I wish someone had shared theirs with me earlier.",
+      "honest take on {topic} after actually doing the work — not just reading about it."
+    ],
+    casual: [
+      "obsessed with {topic} rn, that's the whole tweet",
+      "just here to say {topic} is really something else. okay bye.",
+      "today's mood: {topic} and absolutely nothing else tbh"
+    ],
+    romantic: [
+      "some things just feel like {topic}. soft, warm, exactly right.",
+      "if you know, you know. {topic} is everything. 🤍",
+      "the quiet joy of {topic}. that's it. that's the tweet."
+    ],
+    bold: [
+      "{topic}. i don't explain my vision.",
+      "not everyone will understand {topic}. that's fine.",
+      "doing {topic} unapologetically. the results speak for themselves."
+    ]
+  }
+};
+
+function generateCaptions() {
+  const topic = document.getElementById('topic').value.trim();
+  if (!topic) {
+    document.getElementById('topic').focus();
+    document.getElementById('topic').style.borderColor = 'var(--accent2)';
+    setTimeout(() => document.getElementById('topic').style.borderColor = '', 1500);
+    return;
+  }
+
+  const btn = document.getElementById('genBtn');
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spinner"></span>Generating...';
+
+  setTimeout(() => {
+    const pool = captions[activePlatform][activeTone] || captions.instagram.funny;
+    const hashtags = document.getElementById('hashtags').value;
+    const useEmoji = document.getElementById('emoji').value === 'yes';
+    const hashtagMap = {
+      instagram: '#instagram #instadaily #contentcreator #viral #explorepage',
+      tiktok: '#fyp #foryou #viral #tiktok #trending',
+      youtube: '#youtube #youtuber #subscribe #viral #video',
+      twitter: '#trending #viral #twitter'
+    };
+
+    const list = document.getElementById('captionList');
+    list.innerHTML = '';
+
+    pool.forEach((template, i) => {
+      let text = template.replace(/\{topic\}/g, topic);
+      if (!useEmoji) text = text.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
+      if (hashtags === 'yes') text += '\n\n' + hashtagMap[activePlatform];
+      if (hashtags === 'few') text += '\n\n' + hashtagMap[activePlatform].split(' ').slice(0,3).join(' ');
+
+      const card = document.createElement('div');
+      card.className = 'caption-card';
+      card.innerHTML = `<div class="caption-text">${text}</div><button class="copy-btn" onclick="copyCaption(this, \`${text.replace(/`/g, '\\`')}\`)">Copy</button>`;
+      list.appendChild(card);
+    });
+
+    document.getElementById('results').classList.add('show');
+    btn.classList.remove('loading');
+    btn.innerHTML = 'Generate Captions';
+    document.getElementById('results').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 900);
+}
+
+function copyCaption(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    item.classList.toggle('open');
+  });
+});
+
+document.getElementById('topic').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generateCaptions(); }
+});
+</script>
+</body>
+</html>
